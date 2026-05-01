@@ -1,0 +1,93 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+#define MAX 100
+
+struct symtab {
+    char name[50];
+    double value;
+} sym[MAX];
+
+int symcount = 0;
+
+double getval(char *s) {
+    for(int i=0;i<symcount;i++)
+        if(strcmp(sym[i].name, s)==0)
+            return sym[i].value;
+    return 0;
+}
+
+void setval(char *s, double val) {
+    for(int i=0;i<symcount;i++) {
+        if(strcmp(sym[i].name, s)==0) {
+            sym[i].value = val;
+            return;
+        }
+    }
+    strcpy(sym[symcount].name, s);
+    sym[symcount].value = val;
+    symcount++;
+}
+
+void yyerror(char *s);
+int yylex();
+%}
+
+%union {
+    double dval;
+    char *sval;
+}
+
+%token <dval> NUMBER
+%token <sval> NAME
+%token SIN COS SQRT LOG
+
+%type <dval> expr
+
+%left '+' '-'
+%left '*' '/'
+%right UMINUS
+
+%%
+
+stmt:
+    stmt line
+    | line
+    ;
+
+line:
+    expr '\n'        { printf("Result = %lf\n", $1); }
+    | NAME '=' expr '\n' { setval($1, $3); }
+    ;
+
+expr:
+    expr '+' expr    { $$ = $1 + $3; }
+    | expr '-' expr  { $$ = $1 - $3; }
+    | expr '*' expr  { $$ = $1 * $3; }
+    | expr '/' expr  { $$ = $1 / $3; }
+    | '(' expr ')'   { $$ = $2; }
+    | '-' expr %prec UMINUS { $$ = -$2; }
+
+    | NUMBER         { $$ = $1; }
+    | NAME           { $$ = getval($1); }
+
+    | SIN '(' expr ')'  { $$ = sin($3); }
+    | COS '(' expr ')'  { $$ = cos($3); }
+    | SQRT '(' expr ')' { $$ = sqrt($3); }
+    | LOG '(' expr ')'  { $$ = log($3); }
+    ;
+
+%%
+
+void yyerror(char *s) {
+    printf("Error: %s\n", s);
+}
+
+int main() {
+    printf("Enter expressions:\n");
+    yyparse();
+    return 0;
+}
