@@ -1,0 +1,80 @@
+%{
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX 1000
+
+char wordsA[MAX][50];
+int countA = 0, match = 0;
+
+char *stopwords[] = {"is","am","a","the","if","in","on","at","of","to",NULL};
+
+int is_stopword(char *word) {
+    for(int i=0; stopwords[i]!=NULL; i++) {
+        if(strcmp(word, stopwords[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+void to_lower(char *word){
+    for(int i=0; word[i]; i++)
+        word[i] = tolower(word[i]);
+}
+%}
+
+%%
+[a-zA-Z]+ {
+    char word[50];
+    strcpy(word, yytext);
+    to_lower(word);
+
+    if(!is_stopword(word)) {
+        strcpy(wordsA[countA++], word);
+    }
+}
+%%
+
+int main(int argc, char *argv[]) {
+
+    FILE *f1 = fopen("docA.txt","r");
+    FILE *f2 = fopen("docB.txt","r");
+
+    if(!f1 || !f2){
+        printf("Error opening files\n");
+        return 1;
+    }
+
+    yyin = f1;
+    yylex();   // read doc A
+
+    yyin = f2;
+
+    char word[50];
+
+    while(fscanf(f2,"%s",word)!=EOF){
+        to_lower(word);
+
+        for(int i=0;i<countA;i++){
+            if(strcmp(word,wordsA[i])==0){
+                match++;
+                break;
+            }
+        }
+    }
+
+    float percent = ((float)match / countA) * 100;
+
+    printf("Similarity = %.2f%%\n", percent);
+
+    if(percent >= 40)
+        printf("Documents are SIMILAR\n");
+    else
+        printf("Documents are NOT SIMILAR\n");
+
+    return 0;
+}
+int yywrap() {
+    return 1;
+}

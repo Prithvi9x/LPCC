@@ -1,0 +1,43 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+char find_word[50], replace_word[50];
+FILE *fp;
+%}
+
+%%
+[a-zA-Z]+ {
+    if(strcmp(yytext, find_word) == 0)
+        printf("%s", replace_word);
+    else
+        printf("%s", yytext);
+}
+
+.|\n { printf("%s", yytext); }
+%%
+
+int main() {
+
+    printf("Enter word to find: ");
+    scanf("%s", find_word);
+
+    printf("Enter replacement word: ");
+    scanf("%s", replace_word);
+
+    fp = fopen("docA.txt", "r");
+    if(!fp){
+        printf("File error\n");
+        return 1;
+    }
+
+    yyin = fp;
+
+    printf("\nProcessed Output:\n");
+    yylex();
+
+    fclose(fp);
+    return 0;
+}
+
+int yywrap() { return 1; }
