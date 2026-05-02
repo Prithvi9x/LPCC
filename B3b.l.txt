@@ -1,0 +1,28 @@
+%{
+#include <stdio.h>
+int valid = 0;
+%}
+
+%option noyywrap
+
+%%
+"while"[ \t]*"("[^)]*")"[ \t]*"{"   {
+    printf("Valid WHILE loop detected\n");
+    valid = 1;
+}
+
+"while"                             {
+    printf("Error: Invalid WHILE syntax\n");
+}
+
+.|\n                                ;
+%%
+int main(){
+    printf("Enter WHILE loop:\n");
+    yylex();
+
+    if(!valid)
+        printf("No valid WHILE loop found\n");
+
+    return 0;
+}

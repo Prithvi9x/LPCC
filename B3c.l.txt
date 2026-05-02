@@ -1,0 +1,37 @@
+%{
+#include <stdio.h>
+
+int words = 0, chars = 0, spaces = 0, lines = 0;
+%}
+
+%option noyywrap
+
+%%
+[^\t\n ]+      { words++; chars += yyleng; }
+[ ]            { spaces++; chars++; }
+\n             { lines++; chars++; }
+\t             { spaces++; chars++; }
+
+.              { chars++; }
+
+%%
+
+int main(){
+    FILE *fp = fopen("docA.txt", "r");
+    if(!fp){
+        printf("Error: File not found\n");
+        return 1;
+    }
+
+    yyin = fp;
+    yylex();
+
+    printf("\nCounts:\n");
+    printf("Words: %d\n", words);
+    printf("Characters: %d\n", chars);
+    printf("Spaces: %d\n", spaces);
+    printf("Lines: %d\n", lines);
+
+    fclose(fp);
+    return 0;
+}
