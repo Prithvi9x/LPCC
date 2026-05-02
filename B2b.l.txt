@@ -1,0 +1,45 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+int count = 0;
+int total = 0;
+%}
+
+%option noyywrap
+
+%%
+doctor|hospital|medicine|patient|surgery {
+    count++;
+    total++;
+}
+
+[a-zA-Z]+ {
+    total++;
+}
+
+.|\n ;
+%%
+
+int main() {
+    FILE *fp = fopen("doc.txt","r");
+    if(!fp){
+        printf("File not found\n");
+        return 1;
+    }
+
+    yyin = fp;
+    yylex();
+
+    float percent = (float)count / total * 100;
+
+    printf("Medical keyword percentage: %.2f%%\n", percent);
+
+    if(percent >= 20)
+        printf("Document is MEDICAL\n");
+    else
+        printf("Not a medical document\n");
+
+    fclose(fp);
+    return 0;
+}

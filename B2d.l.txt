@@ -1,0 +1,39 @@
+%{
+#include <stdio.h>
+
+char find_char, replace_char;
+%}
+
+%option noyywrap
+
+%%
+. {
+    if(yytext[0] == find_char)
+        putchar(replace_char);
+    else
+        putchar(yytext[0]);
+}
+%%
+
+int main() {
+
+    printf("Enter character to replace: ");
+    scanf(" %c", &find_char);
+
+    printf("Enter replacement character: ");
+    scanf(" %c", &replace_char);
+
+    FILE *fp = fopen("input.txt","r");
+    if(!fp){
+        printf("File not found\n");
+        return 1;
+    }
+
+    yyin = fp;
+
+    printf("\nOutput:\n");
+    yylex();
+
+    fclose(fp);
+    return 0;
+}

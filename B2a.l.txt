@@ -1,0 +1,39 @@
+%{
+#include <stdio.h>
+%}
+
+%option noyywrap
+
+%%
+"//".*                ;  // ignore single-line comments
+
+"/*"([^*]|\*+[^*/])*\*+"/"   ;  // ignore multi-line comments
+
+.|\n                  { printf("%s", yytext); }
+
+%%
+
+int main() {
+    FILE *fp = fopen("input.c", "r");
+    if(!fp){
+        printf("Error: File not found\n");
+        return 1;
+    }
+
+    FILE *out = fopen("output.c", "w");
+    if(!out){
+        printf("Error creating output file\n");
+        return 1;
+    }
+
+    yyin = fp;
+    yyout = out;
+
+    yylex();
+
+    printf("Comments removed. Output saved in output.c\n");
+
+    fclose(fp);
+    fclose(out);
+    return 0;
+}
