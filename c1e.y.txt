@@ -1,0 +1,29 @@
+%{
+#include <stdio.h>
+int yylex(void);
+void yyerror(const char *s){ printf("Invalid FOR loop\n"); }
+%}
+
+%token FOR ID NUM
+
+%%
+S : FOR '(' E ';' E ';' E ')' '{' BODY '}' 
+    { printf("Valid FOR loop\n"); }
+  ;
+
+E : ID '=' NUM
+  | ID '<' NUM
+  | ID '>' NUM
+  | ID '=' ID '+' NUM
+  ;
+
+BODY : ID '=' ID '+' NUM ';'
+     | /* empty */
+     ;
+%%
+
+int main(){
+    printf("Enter FOR loop:\n");
+    yyparse();
+    return 0;
+}

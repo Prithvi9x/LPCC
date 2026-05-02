@@ -1,0 +1,38 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+int yylex(void);
+void yyerror(const char *s){
+    printf("Invalid postfix expression\n");
+}
+%}
+
+%union {
+    char str[100];
+}
+
+%token <str> ID
+%type <str> E S
+
+%%
+
+S : E {
+        printf("Infix: %s\n", $1);
+    }
+  ;
+
+E : E E '+' { sprintf($$, "(%s+%s)", $1, $2); }
+  | E E '-' { sprintf($$, "(%s-%s)", $1, $2); }
+  | E E '*' { sprintf($$, "(%s*%s)", $1, $2); }
+  | E E '/' { sprintf($$, "(%s/%s)", $1, $2); }
+  | ID      { strcpy($$, $1); }
+  ;
+
+%%
+
+int main(){
+    printf("Enter postfix:\n");
+    yyparse();
+    return 0;
+}
